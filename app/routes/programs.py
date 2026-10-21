@@ -19,7 +19,7 @@ def load_program(program_id):
     program["items"] = query_all(
         """
         SELECT pe.id, pe.exercise_id, pe.position, pe.sets, pe.target, pe.rest_seconds, pe.rep_min, pe.rep_max, pe.target_weight, pe.added_block, pe.cue,
-               e.name, e.measure, e.track_weight, e.video_id, e.primary_muscle, e.media_loop, e.equipment
+               e.name, e.measure, e.track_weight, e.video_id, e.primary_muscle, e.media_loop, e.equipment, e.pattern
         FROM program_exercises pe JOIN exercises e ON e.id = pe.exercise_id
         WHERE pe.program_id = ? ORDER BY pe.position
         """,

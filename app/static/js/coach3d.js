@@ -1,6 +1,6 @@
-import * as THREE from "../vendor/three/three.module.min.js?v=cycle2";
-import { GLTFLoader } from "../vendor/three/addons/loaders/GLTFLoader.js?v=cycle2";
-import { clone as cloneSkinned } from "../vendor/three/addons/utils/SkeletonUtils.js?v=cycle2";
+import * as THREE from "../vendor/three/three.module.min.js";
+import { GLTFLoader } from "../vendor/three/addons/loaders/GLTFLoader.js";
+import { clone as cloneSkinned } from "../vendor/three/addons/utils/SkeletonUtils.js";
 import { esc } from "./core.js?v=cycle2";
 
 const MODELS = { max: "/static/coach/max.glb", lena: "/static/coach/lena.glb" };

@@ -1,6 +1,7 @@
 import { api, esc, num, toast, openModal, confirmModal, formatSet, todayIso, relativeDay, mediaTag, createLoopPlayer, onCleanup, loadExercises, invalidate, EFFORT_LABELS, MEASURE_UNITS, formatClock, beep } from "../js/core.js?v=cycle2";
 import { suggested, stepWeight, showRest } from "../js/views/workout.js?v=cycle2";
 import { setTop, focusMode } from "./app.js?v=cycle2";
+import { slideIn, celebrate } from "../js/motion.js?v=cycle2";
 import { openCoach, preloadCoach } from "../js/coach3d.js?v=cycle2";
 import { painNote } from "../js/rebuild.js?v=cycle2";
 
@@ -152,26 +153,34 @@ function firstIncomplete(from) {
 
 function bindSwipe(view) {
   let start = null;
-  view.addEventListener("touchstart", (event) => {
+  const onStart = (event) => {
     if (event.target.closest(".body-viewer, input, .mw-media")) return;
     start = { x: event.touches[0].clientX, y: event.touches[0].clientY };
-  }, { passive: true });
-  view.addEventListener("touchend", (event) => {
+  };
+  const onEnd = (event) => {
     if (!start) return;
     const dx = event.changedTouches[0].clientX - start.x;
     const dy = event.changedTouches[0].clientY - start.y;
     start = null;
-    if (Math.abs(dx) > 70 && Math.abs(dy) < 50) goTo(run.index + (dx < 0 ? 1 : -1));
-  }, { passive: true });
+    if (Math.abs(dx) > 70 && Math.abs(dy) < 50) goTo(run.index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+  };
+  view.addEventListener("touchstart", onStart, { passive: true });
+  view.addEventListener("touchend", onEnd, { passive: true });
+  onCleanup(() => {
+    view.removeEventListener("touchstart", onStart);
+    view.removeEventListener("touchend", onEnd);
+  });
 }
 
-function goTo(index) {
+function goTo(index, direction) {
   const list = run.session.exercises;
   if (!list.length) return;
+  const from = run.index;
   run.index = (index + list.length) % list.length;
   run.effort = null;
   run.media = "loop";
   draw();
+  slideIn(document.getElementById("mw-content"), direction || (run.index >= from ? 1 : -1));
   api("PUT", "/api/sessions/" + run.session.id + "/state", { current_index: run.index }).catch(() => {});
 }
 
@@ -359,8 +368,12 @@ async function reload() {
 }
 
 async function changePlanned(sets) {
-  await api("PUT", "/api/session-exercises/" + current().id + "/planned", { sets });
-  reload();
+  try {
+    await api("PUT", "/api/session-exercises/" + current().id + "/planned", { sets });
+    await reload();
+  } catch (error) {
+    toast(error.message, "error");
+  }
 }
 
 function editSet(item, set) {
@@ -371,14 +384,22 @@ function editSet(item, set) {
   modal.element.querySelector("#es-save").addEventListener("click", async () => {
     const weight = modal.element.querySelector("#es-weight");
     const value = modal.element.querySelector("#es-value");
-    await api("PUT", "/api/sets/" + set.id, { weight: weight && weight.value !== "" ? Number(weight.value) : null, value: value && value.value !== "" ? Number(value.value) : null, effort: set.effort });
-    modal.close();
-    reload();
+    try {
+      await api("PUT", "/api/sets/" + set.id, { weight: weight && weight.value !== "" ? Number(weight.value) : null, value: value && value.value !== "" ? Number(value.value) : null, effort: set.effort });
+      modal.close();
+      await reload();
+    } catch (error) {
+      toast(error.message, "error");
+    }
   });
   modal.element.querySelector("#es-delete").addEventListener("click", async () => {
-    await api("DELETE", "/api/sets/" + set.id);
-    modal.close();
-    reload();
+    try {
+      await api("DELETE", "/api/sets/" + set.id);
+      modal.close();
+      await reload();
+    } catch (error) {
+      toast(error.message, "error");
+    }
   });
 }
 
@@ -393,7 +414,12 @@ function exerciseSheet() {
     modal.close();
     const ok = await confirmModal("Discard workout", "All sets of this workout will be deleted.", "Discard", true);
     if (!ok) return;
-    await api("DELETE", "/api/sessions/" + run.session.id);
+    try {
+      await api("DELETE", "/api/sessions/" + run.session.id);
+    } catch (error) {
+      toast(error.message, "error");
+      return;
+    }
     teardown();
     location.hash = "#/";
   });
@@ -408,7 +434,12 @@ async function addExercise() {
     modal.element.querySelector("#ae-list").innerHTML = exercises.filter((exercise) => exercise.name.toLowerCase().includes(query)).slice(0, 40).map((exercise) =>
       '<button class="m-option" data-add="' + exercise.id + '">' + esc(exercise.name) + "</button>").join("");
     modal.element.querySelectorAll("[data-add]").forEach((button) => button.addEventListener("click", async () => {
-      run.session = await api("POST", "/api/sessions/" + run.session.id + "/exercises", { exercise_id: Number(button.dataset.add), sets: 3, target: "", rest_seconds: 90 });
+      try {
+        run.session = await api("POST", "/api/sessions/" + run.session.id + "/exercises", { exercise_id: Number(button.dataset.add), sets: 3, target: "", rest_seconds: 90 });
+      } catch (error) {
+        toast(error.message, "error");
+        return;
+      }
       modal.close();
       goTo(run.session.exercises.length - 1);
     }));
@@ -440,12 +471,16 @@ async function finish(allDone) {
     '<p class="muted">The coach adjusts weights and reps for next time and writes a short note.</p>' +
     '<label class="field"><span>Note (optional)</span><textarea id="fw-notes" placeholder="Sleep, energy, pain"></textarea></label>' +
     '<div class="modal-foot"><button class="btn" data-close>Keep training</button><button class="btn primary" id="fw-save">Save workout</button></div>');
-  modal.element.querySelector("#fw-save").addEventListener("click", async () => {
+  const saveButton = modal.element.querySelector("#fw-save");
+  saveButton.addEventListener("click", async () => {
+    if (saveButton.disabled) return;
+    saveButton.disabled = true;
     try {
       const result = await api("POST", "/api/sessions/" + run.session.id + "/finish", { notes: modal.element.querySelector("#fw-notes").value });
       modal.close();
       teardown();
       invalidate("programs");
+      celebrate();
       const label = { weight_up: "heavier", weight_down: "lighter", reps_up: "more reps", time_up: "longer", weight_set: "start weight" };
       const sets = result.exercises.reduce((sum, entry) => sum + entry.sets.length, 0);
       const extra = '<div class="m-stat-row"><div class="m-stat"><span>Sets</span><b>' + sets + "</b></div>" +
@@ -463,6 +498,7 @@ async function finish(allDone) {
         onPrimary: () => { location.hash = "#/"; },
       });
     } catch (error) {
+      saveButton.disabled = false;
       toast(error.message, "error");
     }
   });

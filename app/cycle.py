@@ -5,6 +5,7 @@ import json
 import math
 import os
 import secrets
+import sqlite3
 import statistics
 import time
 from datetime import date, timedelta
@@ -477,7 +478,11 @@ def apply_to_program(program, day):
     if plan["level"] == "none":
         return program, False
     adjusted = dict(program)
-    adjusted["items"] = plan["items"]
+    adjusted["items"] = []
+    for item in plan["items"]:
+        item = dict(item)
+        item["target"] = db.build_target(item.get("rep_min"), item.get("rep_max"), item["measure"], item.get("target") or "")
+        adjusted["items"].append(item)
     adjusted["name"] = program["name"] + " (light)"
     return adjusted, True
 
@@ -947,8 +952,11 @@ def edit_period(period_id: int, body: PeriodIn, x_health_token: str = Header(def
     end = valid_day(body.end_day) if body.end_day else None
     if end and end < start:
         raise HTTPException(400, "End is before start")
-    with db.transaction() as conn:
-        conn.execute("UPDATE cycle_periods SET start_day = ?, end_day = ? WHERE id = ? AND user_id = ?", (start, end, period_id, db.uid()))
+    try:
+        with db.transaction() as conn:
+            conn.execute("UPDATE cycle_periods SET start_day = ?, end_day = ? WHERE id = ? AND user_id = ?", (start, end, period_id, db.uid()))
+    except sqlite3.IntegrityError:
+        raise HTTPException(409, "Another period already starts on that day")
     return health_stats()
 
 

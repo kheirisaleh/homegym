@@ -1,11 +1,9 @@
 import json
-import math
 import threading
 import time
 from datetime import date, timedelta
 
 import ai
-import catalog
 import db
 import nutrition
 import engine
@@ -416,7 +414,6 @@ def analyse(design, context_info):
             sets = int(item.get("sets") or 0)
             rep_min = item.get("rep_min")
             rep_max = item.get("rep_max")
-            rest = int(item.get("rest_seconds") or 0)
             measure = exercise["measure"]
             if measure == "min":
                 if not rep_min or rep_min < 5 or rep_min > 75:
@@ -740,6 +737,8 @@ def design_program(user_id, request=None, progress=None, attempts=3):
     if best is None:
         raise ArchitectError("the AI did not return a usable program")
     best["design"] = _repair(best["design"], context_info)
+    if not best["design"]["days"]:
+        raise ArchitectError("the AI did not return any usable training day")
     best["analysis"] = analyse(best["design"], context_info)
     best["context"] = context_info
     best["history"] = history

@@ -1,5 +1,4 @@
 import json
-import os
 import threading
 import time
 import urllib.error
@@ -7,7 +6,6 @@ import urllib.request
 from pathlib import Path
 
 import config as app_config
-import db
 
 KNOWLEDGE_DIR = Path(__file__).parent / "knowledge"
 
@@ -148,8 +146,11 @@ def status(max_age=15):
             result["reachable"] = True
             result["models"] = [model.get("name", "") for model in tags.get("models", [])]
             result["model_installed"] = any(_model_matches(name, settings["model"]) for name in result["models"])
-        except (urllib.error.URLError, OSError, ValueError):
-            pass
+        except AIError as error:
+            result["reachable"] = True
+            result["error"] = str(error)
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            result["error"] = str(error)
     result["ready"] = result["reachable"] and result["model_installed"]
     with _status_lock:
         _status_cache["time"] = time.time()

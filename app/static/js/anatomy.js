@@ -1,6 +1,6 @@
-import * as THREE from "../vendor/three/three.module.min.js?v=cycle2";
-import { OrbitControls } from "../vendor/three/addons/controls/OrbitControls.js?v=cycle2";
-import { GLTFLoader } from "../vendor/three/addons/loaders/GLTFLoader.js?v=cycle2";
+import * as THREE from "../vendor/three/three.module.min.js";
+import { OrbitControls } from "../vendor/three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "../vendor/three/addons/loaders/GLTFLoader.js";
 
 const MODEL_URLS = {
   male: "/static/models/full-body-male-mobile.glb",

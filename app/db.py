@@ -565,7 +565,7 @@ def equipment_map():
 def snapshot_program(conn, program_id, reason):
     items = [
         dict(row) for row in conn.execute(
-            "SELECT exercise_id, position, sets, target, rest_seconds, rep_min, rep_max, target_weight, miss_count, hit_count, added_block FROM program_exercises WHERE program_id = ? ORDER BY position",
+            "SELECT exercise_id, position, sets, target, rest_seconds, rep_min, rep_max, target_weight, miss_count, hit_count, added_block, cue FROM program_exercises WHERE program_id = ? ORDER BY position",
             (program_id,),
         ).fetchall()
     ]
@@ -590,12 +590,13 @@ def restore_program(conn, version_id):
             continue
         conn.execute(
             """
-            INSERT INTO program_exercises (program_id, exercise_id, position, sets, target, rest_seconds, rep_min, rep_max, target_weight, miss_count, hit_count, added_block)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO program_exercises (program_id, exercise_id, position, sets, target, rest_seconds, rep_min, rep_max, target_weight, miss_count, hit_count, added_block, cue)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                program_id, item["exercise_id"], item["position"], item["sets"], item["target"], item["rest_seconds"],
-                item["rep_min"], item["rep_max"], item["target_weight"], item["miss_count"], item["hit_count"], item["added_block"],
+                program_id, item["exercise_id"], item["position"], item["sets"], item.get("target") or "", item.get("rest_seconds", 90),
+                item.get("rep_min"), item.get("rep_max"), item.get("target_weight"), item.get("miss_count", 0), item.get("hit_count", 0),
+                item.get("added_block", 0), item.get("cue") or "",
             ),
         )
     return program_id

@@ -86,7 +86,7 @@ def sync(start=None, end=None):
         with db.transaction() as conn:
             for report in data.get("days", []):
                 user_id = users.get(str((report.get("user") or {}).get("name") or "").strip().lower())
-                if not user_id:
+                if not user_id or not report.get("date"):
                     continue
                 totals = report.get("totals") or {}
                 entries = [
@@ -168,7 +168,10 @@ def _verify(raw, stamp, signature):
     secret = config.get("pantry_webhook_secret").strip()
     if not secret:
         return True
-    if not stamp or not signature or abs(time.time() - int(stamp)) > 600:
+    try:
+        if not stamp or not signature or abs(time.time() - int(stamp)) > 600:
+            return False
+    except ValueError:
         return False
     expected = "sha256=" + hmac.new(secret.encode("utf-8"), (stamp + ".").encode("utf-8") + raw, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature)

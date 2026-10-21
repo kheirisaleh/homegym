@@ -118,6 +118,8 @@ def extract_video_id(value):
     value = value.strip()
     if VIDEO_ID_PATTERN.match(value):
         return value
+    if "://" not in value:
+        value = "https://" + value
     parsed = urllib.parse.urlparse(value)
     host = (parsed.netloc or "").lower()
     if host.endswith("youtu.be"):

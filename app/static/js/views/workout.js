@@ -5,6 +5,7 @@ import {
 import { openCoach, preloadCoach } from "../coach3d.js?v=cycle2";
 import { painNote } from "../rebuild.js?v=cycle2";
 import { restCoachTip } from "../coachui.js?v=cycle2";
+import { slideIn, celebrate } from "../motion.js?v=cycle2";
 
 const workout = { session: null, index: 0, player: null, effort: null, timer: null, clockHandle: null, feedback: {} };
 
@@ -395,6 +396,7 @@ function handleKey(event) {
   const tag = (event.target.tagName || "").toLowerCase();
   const inNumber = tag === "input" && event.target.type === "number";
   if ((tag === "input" && !inNumber) || tag === "textarea" || tag === "select") return;
+  if (event.key === "Enter" && (tag === "button" || tag === "a")) return;
   if (event.key === "Enter" && !event.target.closest(".sets-table")) {
     event.preventDefault();
     logSet();
@@ -413,9 +415,11 @@ function handleKey(event) {
 async function goTo(index) {
   const list = workout.session.exercises;
   if (!list.length) return;
+  const from = workout.index;
   workout.index = (index + list.length) % list.length;
   workout.effort = null;
   draw();
+  slideIn(document.getElementById("w-main"), workout.index >= from ? 1 : -1);
   api("PUT", "/api/sessions/" + workout.session.id + "/state", { current_index: workout.index }).catch(() => {});
 }
 
@@ -494,7 +498,7 @@ function toggleTimer(item, button) {
     const input = document.getElementById("in-value");
     if (input) input.value = item.measure === "min" ? Math.round((elapsed / 60) * 2) / 2 : Math.round(elapsed);
     stopTimer();
-    button.textContent = item.measure === "sec" ? "Countdown starten" : "Stoppuhr starten";
+    button.textContent = item.measure === "sec" ? "Start countdown" : "Start stopwatch";
     return;
   }
   const input = document.getElementById("in-value");
@@ -584,13 +588,17 @@ async function finish(allDone) {
     '<label class="field"><span>Note (optional)</span><textarea id="f-notes" placeholder="Sleep, energy, pain, anything you noticed"></textarea></label>' +
     '<div class="modal-foot"><button class="btn ghost" data-close>Keep training</button><button class="btn primary" data-finish autofocus>Save workout</button></div>',
   );
-  modal.element.querySelector("[data-finish]").addEventListener("click", async () => {
+  const finishButton = modal.element.querySelector("[data-finish]");
+  finishButton.addEventListener("click", async () => {
+    if (finishButton.disabled) return;
+    finishButton.disabled = true;
     try {
       const result = await api("POST", "/api/sessions/" + workout.session.id + "/finish", { notes: modal.element.querySelector("#f-notes").value });
       modal.close();
       teardown();
       state.active = null;
       invalidate("programs");
+      celebrate();
       const persona = await api("GET", "/api/coach/persona").catch(() => null);
       openCoach({
         persona: persona || undefined,
@@ -600,6 +608,7 @@ async function finish(allDone) {
         onPrimary: () => showSummary(result),
       });
     } catch (error) {
+      finishButton.disabled = false;
       toast(error.message, "error");
     }
   });
@@ -611,16 +620,21 @@ function showSummary(session) {
   const changes = session.changes || [];
   const label = { weight_up: "heavier", weight_down: "lighter", reps_up: "more reps", time_up: "longer", weight_set: "starting weight" };
   const minutes = Math.round((new Date(session.finished_at) - new Date(session.started_at)) / 60000);
-  openModal(
+  let leaving = false;
+  const modal = openModal(
     '<div class="modal-head"><h2>Saved</h2></div>' +
     '<div class="editor-summary"><span><b>' + sets + "</b>sets</span><span><b>" + num(volume / 1000, 2) + "</b>tonnes</span><span><b>" + minutes + "</b>minutes</span></div>" +
     (changes.length ? '<h3>Next time</h3><div class="finish-summary">' + changes.map((change) =>
       '<div class="change"><span class="chip ' + (change.kind === "weight_down" ? "" : "priority") + '">' + esc(label[change.kind] || change.kind) + "</span>" + esc(change.exercise) +
       (change.weight ? " · " + num(change.weight) + " kg" : "") + "</div>").join("") + "</div>"
       : '<p class="muted">Weights stay the same. Add reps until you reach the top of the range in every set.</p>') +
-    '<div class="modal-foot"><a class="btn" href="#/history/training/' + session.id + '" data-close>Details</a><button class="btn primary" data-close autofocus>Back to overview</button></div>',
-    { onClose: () => { location.hash = "#/"; } },
+    '<div class="modal-foot"><a class="btn" href="#/history/training/' + session.id + '" data-details>Details</a><button class="btn primary" data-close autofocus>Back to overview</button></div>',
+    { onClose: () => { if (!leaving) location.hash = "#/"; } },
   );
+  modal.element.querySelector("[data-details]").addEventListener("click", () => {
+    leaving = true;
+    modal.close();
+  });
 }
 
 async function discard() {
@@ -652,6 +666,11 @@ async function addExercise() {
     if (first) select.value = first.value;
   });
   modal.element.querySelector("[data-add]").addEventListener("click", async () => {
+    const picked = select.options[select.selectedIndex];
+    if (!picked || picked.hidden) {
+      toast("Pick an exercise first", "error");
+      return;
+    }
     try {
       workout.session = await api("POST", "/api/sessions/" + workout.session.id + "/exercises", {
         exercise_id: Number(select.value),

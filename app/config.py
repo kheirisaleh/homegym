@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import os
 import secrets
+import sqlite3
 import threading
 import time
 
@@ -37,7 +38,10 @@ def on_change(callback):
 
 
 def _stored(key):
-    return db.get_setting(_PREFIX + key)
+    try:
+        return db.get_setting(_PREFIX + key)
+    except sqlite3.OperationalError:
+        return None
 
 
 def source(key):

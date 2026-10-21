@@ -24,7 +24,10 @@ Reports are saved in `data/quality/`.
 
     docker compose up -d --build
 
-Desktop: http://<server>:8090, mobile: http://<server>:8090/m/
+Desktop: http://<server>:8090, mobile: http://<server>:8090/m
+
+The image is built in two stages: Node builds the React app from `frontend/`, then the Python image serves it
+together with the API. Phones are sent to `/m` automatically; "Desktop version" in the More tab switches back.
 
 ## Mobile app
 
@@ -39,5 +42,27 @@ Install it on the phone from the Tailscale address so the same icon works at hom
 
 ## Keyboard
 
-* `1` to `7` switch sections, `P` projector mode
+* `1` to `9` switch sections (`0` settings, `H` health), `P` projector mode
 * During a workout: `Enter` saves the set, `↑ ↓` reps, `Shift ↑ ↓` weight, `← →` switch exercise
+
+## Development
+
+Backend (FastAPI, SQLite):
+
+    pip install -r requirements.txt -r requirements-dev.txt
+    ruff check .
+    pytest
+
+Frontend (React 19, TypeScript, Vite) in `frontend/`:
+
+    npm ci
+    npm run dev          # http://localhost:5173, proxies /api to http://127.0.0.1:8000
+    npm run typecheck
+    npm run lint
+    npm test             # Vitest unit and component tests
+    npm run build        # writes app/web, which the backend serves
+    npx playwright test  # end to end tests against a throw away database
+
+Start the API for `npm run dev` with `cd app && BACKGROUND_WORKERS=0 uvicorn main:app --reload`.
+`frontend/lab/coach.html` (open it through `npm run dev`) shows the 3D coach on its own for tuning moves.
+How the frontend is organised is described in `docs/FRONTEND.md`. GitHub Actions runs all of the above on every pull request.

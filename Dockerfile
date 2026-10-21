@@ -1,9 +1,17 @@
+FROM node:22-slim AS web
+WORKDIR /src/frontend
+COPY frontend/package.json frontend/package-lock.json frontend/.npmrc ./
+RUN npm ci --no-audit --no-fund
+COPY frontend/ ./
+RUN npm run build
+
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DATA_DIR=/data
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ .
+COPY --from=web /src/app/web ./web
 RUN chmod -R a+rX /app
 RUN useradd --uid 1000 --create-home appuser && mkdir -p /data && chown appuser /data
 USER appuser

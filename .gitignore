@@ -17,3 +17,4 @@ frontend/dist/
 app/web/
 playwright-report/
 test-results/
+frontend/coverage/

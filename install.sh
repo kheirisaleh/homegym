@@ -14,7 +14,9 @@ fi
 
 if [ "$SOURCE_DIR" != "$TARGET_DIR" ]; then
   mkdir -p "$TARGET_DIR"
-  cp -r "$SOURCE_DIR/app" "$SOURCE_DIR/docs" "$SOURCE_DIR/Dockerfile" "$SOURCE_DIR/docker-compose.yml" "$SOURCE_DIR/requirements.txt" "$SOURCE_DIR/README.md" "$TARGET_DIR/"
+  cp -r "$SOURCE_DIR/app" "$SOURCE_DIR/docs" "$SOURCE_DIR/Dockerfile" "$SOURCE_DIR/.dockerignore" "$SOURCE_DIR/docker-compose.yml" "$SOURCE_DIR/requirements.txt" "$SOURCE_DIR/README.md" "$TARGET_DIR/"
+  rm -rf "$TARGET_DIR/frontend"
+  tar -C "$SOURCE_DIR" --exclude=node_modules --exclude=test-results --exclude=playwright-report -cf - frontend | tar -C "$TARGET_DIR" -xf -
 fi
 
 mkdir -p "$TARGET_DIR/data"

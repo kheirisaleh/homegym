@@ -172,3 +172,10 @@ def test_single_page_app_fallback(client):
     assert client.get("/../etc/passwd").status_code in (200, 404)
     assert "root:" not in client.get("/..%2F..%2Fetc%2Fpasswd").text
     assert client.get("/healthz").json() == {"ok": True}
+
+
+def test_quality_page_is_served_outside_the_single_page_app(client):
+    response = client.get("/quality")
+    assert response.status_code == 200
+    assert "Program Quality" in response.text
+    assert response.headers["cache-control"] == "no-cache"

@@ -826,6 +826,7 @@ export interface HealthHeaderProps {
 export function HealthView({ Header, home, bodyClassName }: { Header: ComponentType<HealthHeaderProps>; home: string; bodyClassName?: string }) {
   const cycle = useCycleState();
   const [unlock, setUnlock] = useState(0);
+  const [pinKnown, setPinKnown] = useState(false);
   const unlocked = Boolean(healthToken());
   const health = useResource<CycleHealth | "locked" | null>(
     async () => {
@@ -848,7 +849,12 @@ export function HealthView({ Header, home, bodyClassName }: { Header: ComponentT
   let body;
   if (!cycle) body = <div className="skeleton m-skeleton" aria-busy="true" />;
   else if (!cycle.eligible) body = <div className="empty">This page is only available for female profiles.</div>;
-  else if (!unlocked || health.data === "locked") body = <PinGate pinSet={Boolean(cycle.pin_set) || health.data === "locked"} onUnlocked={() => setUnlock((value) => value + 1)} />;
+  else if (!unlocked || health.data === "locked") body = <PinGate pinSet={Boolean(cycle.pin_set) || pinKnown || health.data === "locked"}
+        onUnlocked={() => {
+          setPinKnown(true);
+          setUnlock((value) => value + 1);
+        }}
+      />;
   else if (health.error) body = <div className="empty">{health.error.message}</div>;
   else if (!health.data) body = <div className="skeleton m-skeleton" aria-busy="true" />;
   else body = <HealthBody key={unlock} data={health.data} onReload={health.reload} onLocked={relock} home={home} />;

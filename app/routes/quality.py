@@ -1,9 +1,18 @@
 
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 import ai
 
 router = APIRouter()
+QUALITY_PAGE = Path(__file__).resolve().parent.parent / "static" / "quality.html"
+
+
+@router.get("/quality", include_in_schema=False)
+def quality_page():
+    return FileResponse(QUALITY_PAGE, headers={"Cache-Control": "no-cache"})
 
 
 @router.get("/api/quality")

@@ -189,9 +189,6 @@ def worker():
 
 
 def attach(app):
-    init_schema()
-    threading.Thread(target=worker, daemon=True).start()
-
     @app.post("/api/integrations/pantry")
     async def pantry_webhook(request: Request, x_pantry_timestamp: Optional[str] = Header(None), x_pantry_signature: Optional[str] = Header(None)):
         raw = await request.body()

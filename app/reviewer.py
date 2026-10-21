@@ -4,10 +4,10 @@ from datetime import date, datetime, timedelta
 
 import ai
 import config
-import nutrition
 import db
 import engine
 import exercise_notes
+import nutrition
 
 REVIEW_WEEKDAYS = {2, 6}
 REVIEW_HOURS = range(2, 5)

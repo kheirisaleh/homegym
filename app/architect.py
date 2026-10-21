@@ -5,9 +5,9 @@ from datetime import date, timedelta
 
 import ai
 import db
-import nutrition
 import engine
 import exercise_notes
+import nutrition
 import planner
 
 LEVEL_VOLUME = {
@@ -380,7 +380,7 @@ def analyse(design, context_info):
     level = context_info["level"]
     problems = []
     warnings = []
-    weekly = {muscle: 0.0 for muscle in TRAINABLE + ["front_delts", "forearms"]}
+    weekly = dict.fromkeys(TRAINABLE + ["front_delts", "forearms"], 0.0)
     push = pull = 0.0
     cardio_minutes = 0
     schedule = set(context_info["weekdays"])
@@ -554,7 +554,7 @@ def build_context(user_id, request=None):
         weekdays = planner.WEEKDAY_LAYOUT[days]
     history_top = {}
     history_reps = {}
-    for name, record in per_exercise.items():
+    for record in per_exercise.values():
         recent = [point for point in record["exposures"] if point["top_weight"]][-2:]
         if recent and record["exercise_id"]:
             best = max(recent, key=lambda point: (point["top_weight"], point["reps_at_top"]))
@@ -702,7 +702,7 @@ def design_program(user_id, request=None, progress=None, attempts=3):
     for attempt in range(attempts):
         say("Designing your program, draft " + str(attempt + 1))
         try:
-            design = _with_retry(lambda: _design(full_context, feedback))
+            design = _with_retry(lambda notes=feedback: _design(full_context, notes))
         except ValueError:
             feedback = "The answer was not valid JSON for the schema."
             continue
@@ -889,10 +889,9 @@ def run_rebuild(user_id, request):
         _set_status(user_id, "ready", "")
         with db.transaction() as conn:
             conn.execute("UPDATE users SET rebuild_request = '' WHERE id = ?", (user_id,))
-        with db.as_user(user_id):
-            with db.transaction() as conn:
-                db.log_event(conn, "manual", "rebuild_failed", "The new program could not be created",
-                             "Your current program is unchanged. Reason: " + str(error)[:300], source="ai")
+        with db.as_user(user_id), db.transaction() as conn:
+            db.log_event(conn, "manual", "rebuild_failed", "The new program could not be created",
+                         "Your current program is unchanged. Reason: " + str(error)[:300], source="ai")
     finally:
         with _running_lock:
             _running.discard(user_id)

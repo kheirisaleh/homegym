@@ -78,7 +78,7 @@ def _generate(plan, report):
     feedback = ""
     chosen = {}
     attempts = []
-    for attempt in range(2):
+    for _attempt in range(2):
         started = time.time()
         try:
             answer = ai.write_first_program(report, feedback)

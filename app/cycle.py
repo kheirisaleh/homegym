@@ -1,5 +1,4 @@
 import hashlib
-from html import escape as html_escape
 import hmac
 import json
 import math
@@ -9,6 +8,7 @@ import sqlite3
 import statistics
 import time
 from datetime import date, timedelta
+from html import escape as html_escape
 from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Query
@@ -876,8 +876,8 @@ def cycle_plan(program_id: int, day: Optional[str] = None, fresh: bool = False):
     day = valid_day(day) if day else date.today().isoformat()
     if not active_period(day):
         return {"active": False}
-    import main
-    program = main.load_program(program_id)
+    from routes.programs import load_program
+    program = load_program(program_id)
     if not program:
         raise HTTPException(404, "Program not found")
     if fresh:

@@ -319,6 +319,11 @@ def handle(payload, stats_fn):
     return _speak(text["fallback"], end=False, reprompt=text["fallback"])
 
 
+def start_worker():
+    if _skill_id():
+        threading.Thread(target=translate_worker, daemon=True).start()
+
+
 def attach(app, stats_fn):
     @app.post("/alexa/workout")
     async def alexa_endpoint(request: Request):
@@ -341,5 +346,3 @@ def attach(app, stats_fn):
             fail = "Sorry, something went wrong on the home server." if language == "en" else "Entschuldigung, auf dem Heimserver ist etwas schiefgelaufen."
             return JSONResponse(_speak(fail))
 
-    if _skill_id():
-        threading.Thread(target=translate_worker, daemon=True).start()

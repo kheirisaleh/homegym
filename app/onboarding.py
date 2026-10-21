@@ -133,7 +133,7 @@ def _generate(user_id):
     feedback = ""
     chosen = {}
     summary = ""
-    for attempt in range(2):
+    for _attempt in range(2):
         try:
             answer = ai.write_first_program(report, feedback)
         except ValueError:

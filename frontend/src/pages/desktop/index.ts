@@ -1,0 +1,14 @@
+export { CoachPage } from "./Coach";
+export { DashboardPage } from "./Dashboard";
+export { EquipmentPage } from "./Equipment";
+export { ExercisesPage } from "./Exercises";
+export { HealthPage } from "./Health";
+export { HistoryPage } from "./History";
+export { LeaderboardPage } from "./Leaderboard";
+export { ProfilePage } from "./Profile";
+export { ProgramEditorPage } from "./ProgramEditor";
+export { ProgramsPage } from "./Programs";
+export { SessionDetailPage } from "./SessionDetail";
+export { SettingsPage } from "./Settings";
+export { TrainerPage } from "./Trainer";
+export { TrainingPage } from "./Training";

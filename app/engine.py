@@ -484,7 +484,7 @@ def swap_item(conn, item, reason, block, equipment, snapshots, harder=False, lev
                      item["program_id"], item["exercise_id"], block["id"])
         return None
     result = None
-    for attempt in range(2):
+    for _attempt in range(2):
         try:
             result = ai.choose_swap(item, candidates, {"reason": reason, "priority": settings()["priority"]})
             break

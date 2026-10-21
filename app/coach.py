@@ -5,8 +5,8 @@ from datetime import date, datetime, timedelta
 
 import ai
 import db
-import nutrition
 import engine
+import nutrition
 
 PERSONAS = {
     "max": {

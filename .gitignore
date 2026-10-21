@@ -8,3 +8,13 @@ __pycache__/
 *.pyc
 docker-compose.override.yml
 .DS_Store
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+app/web/
+playwright-report/
+test-results/
+frontend/coverage/

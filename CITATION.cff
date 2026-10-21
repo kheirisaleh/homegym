@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software or its coaching rules in your work, please cite it as below."
+title: "Home Gym: a self hosted AI workout coach for home gyms"
+abstract: >-
+  Self hosted training app that writes and adapts strength programs from the equipment a person actually owns,
+  using double progression, block periodisation with deloads and an AI model constrained by fixed rules.
+type: software
+authors:
+  - family-names: Kheiri
+    given-names: Saleh
+repository-code: "https://github.com/kheirisaleh/homegym"
+license: MIT
+keywords:
+  - strength training
+  - progressive overload
+  - periodisation
+  - self hosted
+  - large language models
+  - home gym

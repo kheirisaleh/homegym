@@ -6,6 +6,7 @@ import { renderPlan, renderPlanDetail } from "./plan.js?v=cycle2";
 import { renderSettingsMobile } from "./settings.js?v=cycle2";
 import { renderHealth, configureCycle } from "./cycle.js?v=cycle2";
 import { renderProgress, renderSessionDetail } from "./progress.js?v=cycle2";
+import { enter, routeStart, routeEnd } from "../js/motion.js?v=cycle2";
 import { renderMore, renderExercisesList, renderExerciseDetail, renderEquipmentList, renderCoachMobile, renderBoardMobile, renderProfileMobile, renderTrainerMobile } from "./more.js?v=cycle2";
 
 const ROUTES = [
@@ -56,11 +57,14 @@ async function router() {
     document.querySelectorAll(".m-tabs a").forEach((link) => link.classList.toggle("active", link.dataset.tab === tab));
     view.innerHTML = "";
     window.scrollTo(0, 0);
+    routeStart();
     try {
       await render(view, match);
+      if (current === token) enter(view);
     } catch (error) {
       if (current === token && state.userId) view.innerHTML = '<div class="empty">This page could not be loaded: ' + esc(error.message) + "</div>";
     }
+    if (current === token) routeEnd();
     return;
   }
   location.hash = "#/";

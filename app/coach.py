@@ -36,7 +36,7 @@ VOICE = {
         "rest": "Rest fully on the big lifts, rush only the small stuff.",
         "log": "Log every set right after you finish it.",
         "done_title": ["Job done", "Strong session", "That's how it's done"],
-        "done": "Good work on {program}: {sets} sets in {minutes} minutes.",
+        "done": "Good work on {program}: {sets} in {minutes}.",
         "records": "New bests on {list}. That's real progress.",
         "next": "Next time the app raises {list}.",
         "missing": "{list} got skipped today, let's hit it next time.",
@@ -56,7 +56,7 @@ VOICE = {
         "rest": "Take your full rest on the heavy sets, quality first.",
         "log": "Log each set as soon as it's done.",
         "done_title": ["Beautiful work", "Great session", "Well done"],
-        "done": "You finished {program}: {sets} sets in {minutes} minutes.",
+        "done": "You finished {program}: {sets} in {minutes}.",
         "records": "New personal bests on {list}. I'm proud of that.",
         "next": "For next time the app increases {list}.",
         "missing": "{list} didn't happen today, we'll catch it next time.",
@@ -427,7 +427,15 @@ def rule_outro(user, persona, facts):
     voice = VOICE[persona["key"]]
     session = facts["session"]
     seed = session["id"]
-    sentences = [voice["done"].format(program=session["program_name"], sets=facts["sets"], minutes=facts["minutes"] if facts["minutes"] is not None else "a few")]
+    minutes = facts["minutes"]
+    if minutes is None:
+        minutes_text = "a few minutes"
+    elif minutes < 1:
+        minutes_text = "under a minute"
+    else:
+        minutes_text = str(minutes) + (" minute" if minutes == 1 else " minutes")
+    sets_text = str(facts["sets"]) + (" set" if facts["sets"] == 1 else " sets")
+    sentences = [voice["done"].format(program=session["program_name"], sets=sets_text, minutes=minutes_text)]
     if facts["records"]:
         sentences.append(voice["records"].format(list=", ".join(facts["records"][:3])))
     if facts["changes"]:

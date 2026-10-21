@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -442,7 +442,7 @@ async def upload_media(exercise_id: int, kind: str, file: UploadFile = File(...)
         raise HTTPException(404, "Exercise not found")
     extension = MEDIA_TYPES.get((file.content_type or "").lower())
     if not extension:
-        suffix = Path(file.filename or "").suffix.lower()
+        suffix = Path(file.filename or "").suffix.lower().replace(".jpeg", ".jpg")
         extension = suffix if suffix in MEDIA_TYPES.values() else None
     if not extension:
         raise HTTPException(400, "Allowed: GIF, PNG, JPG, WEBP, SVG, MP4, WEBM and MOV")
@@ -953,7 +953,7 @@ def get_session(session_id: int):
 
 @app.post("/api/sessions/{session_id}/exercises")
 def add_session_exercise(session_id: int, body: SessionExerciseIn):
-    session = own_session(session_id)
+    own_session(session_id)
     exercise = get_exercise(body.exercise_id)
     if not exercise:
         raise HTTPException(404, "Exercise not found")
@@ -1500,6 +1500,8 @@ def delete_user(user_id: int):
         conn.execute("DELETE FROM programs WHERE user_id = ?", (user_id,))
         conn.execute("DELETE FROM blocks WHERE user_id = ?", (user_id,))
         conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        if not conn.execute("SELECT 1 FROM users WHERE is_superuser = 1").fetchone():
+            conn.execute("UPDATE users SET is_superuser = 1 WHERE id = (SELECT MIN(id) FROM users)")
     _known_users["time"] = 0
     return {"ok": True}
 

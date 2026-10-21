@@ -11,6 +11,7 @@ import { renderProfile } from "./views/profile.js?v=cycle2";
 import { renderTrainerSettings } from "./views/trainer.js?v=cycle2";
 import { renderPicker, renderGenerating, avatar } from "./accounts.js?v=cycle2";
 import { renderSettings } from "./views/settings.js?v=cycle2";
+import { enter, routeStart, routeEnd } from "./motion.js?v=cycle2";
 import { renderHealthDesktop, mountCycleDesktop, mountAdjustedDesktop } from "./views/health.js?v=cycle2";
 
 const ROUTES = [
@@ -40,7 +41,7 @@ const ROUTES = [
   [/^\/trainer$/, "trainer", (view) => renderTrainerSettings(view)],
 ];
 
-const NAV_KEYS = { 1: "#/", 2: "#/training", 3: "#/programs", 4: "#/exercises", 5: "#/equipment", 6: "#/history", 7: "#/coach", 8: "#/leaderboard", 9: "#/trainer", 0: "#/settings" };
+const NAV_KEYS = { 1: "#/", 2: "#/training", 3: "#/programs", 4: "#/exercises", 5: "#/equipment", 6: "#/history", 7: "#/coach", 8: "#/leaderboard", 9: "#/trainer", 0: "#/settings", h: "#/health", H: "#/health" };
 
 let renderToken = 0;
 let lastPath = null;
@@ -61,16 +62,20 @@ async function router() {
     if (!match) continue;
     document.querySelectorAll(".nav a").forEach((link) => link.classList.toggle("active", link.dataset.route === name));
     document.body.dataset.route = name;
+    routeStart();
     try {
       await render(view, match);
       if (token === renderToken) {
+        enter(view);
         view.focus({ preventScroll: true });
         await refreshActive();
       }
     } catch (error) {
-      if (!state.userId) return;
+      if (token === renderToken) routeEnd();
+      if (!state.userId || token !== renderToken) return;
       view.innerHTML = '<div class="empty">This page could not be loaded: ' + esc(error.message) + '<br><button class="btn" onclick="location.reload()">Reload</button></div>';
     }
+    if (token === renderToken) routeEnd();
     updateBlockChip();
     scheduleFit();
     return;
@@ -257,6 +262,8 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     toggleProjector();
   } else if (NAV_KEYS[event.key] && !location.hash.startsWith("#/training")) {
+    const link = document.querySelector('.nav a[href="' + NAV_KEYS[event.key] + '"]');
+    if (link && link.style.display === "none") return;
     location.hash = NAV_KEYS[event.key];
   }
 });

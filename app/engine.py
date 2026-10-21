@@ -364,7 +364,7 @@ def check_early_deload(day):
         return False
     sessions = db.query_all(
         "SELECT * FROM sessions WHERE status = 'done' AND deload = 0 AND cycle_adjusted = 0 AND block_id = ? AND user_id = ? ORDER BY day DESC, started_at DESC LIMIT 2",
-        (block["id"],),
+        (block["id"], db.uid()),
     )
     if len(sessions) < 2:
         return False

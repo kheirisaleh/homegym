@@ -1,6 +1,7 @@
 import { api, esc, num, cssVar, formatDay, formatSet, relativeDay, storageGet, storageSet, toast, todayIso, fromIso, EFFORT_LABELS, MEASURE_UNITS, confirmModal, plateColor } from "../js/core.js?v=cycle2";
 import { lineChart, barChart } from "../js/charts.js?v=cycle2";
 import { setTop } from "./app.js?v=cycle2";
+import { enter } from "../js/motion.js?v=cycle2";
 
 const TABS = [["strength", "Strength"], ["exercise", "Exercise"], ["history", "Workouts"], ["body", "Body"]];
 
@@ -10,10 +11,9 @@ export async function renderProgress(view) {
   view.innerHTML = '<div class="m-tabs-inline">' + TABS.map(([key, label]) => '<button data-tab="' + key + '" aria-pressed="' + (tab === key) + '">' + label + "</button>").join("") + '</div><div id="pg-body" style="display:flex;flex-direction:column;gap:16px"></div>';
   view.querySelectorAll("[data-tab]").forEach((button) => button.addEventListener("click", () => { storageSet("m-progress-tab", button.dataset.tab); renderProgress(view); }));
   const body = view.querySelector("#pg-body");
-  if (tab === "strength") return strengthTab(body);
-  if (tab === "exercise") return exerciseTab(body);
-  if (tab === "history") return historyTab(body);
-  return bodyTab(body);
+  const draw = { strength: strengthTab, exercise: exerciseTab, history: historyTab }[tab] || bodyTab;
+  await draw(body);
+  if (view.contains(body)) enter(body);
 }
 
 async function strengthTab(body) {

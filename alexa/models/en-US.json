@@ -1,0 +1,114 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "home coach",
+      "intents": [
+        {
+          "name": "StatusIntent",
+          "slots": [
+            {
+              "name": "name",
+              "type": "USER_NAME"
+            }
+          ],
+          "samples": [
+            "how is my workout going",
+            "how is my training going",
+            "how am i doing",
+            "what is my workout status",
+            "how is my fitness going",
+            "how is {name} doing",
+            "how is the workout of {name} going",
+            "what is the status of {name}"
+          ]
+        },
+        {
+          "name": "NameIntent",
+          "slots": [
+            {
+              "name": "name",
+              "type": "USER_NAME"
+            }
+          ],
+          "samples": [
+            "{name}",
+            "it is {name}",
+            "this is {name}",
+            "i am {name}",
+            "my name is {name}",
+            "it's {name}"
+          ]
+        },
+        {
+          "name": "DailyReportIntent",
+          "slots": [],
+          "samples": [
+            "daily report",
+            "for the daily report",
+            "the daily report",
+            "how did we do today",
+            "today's report",
+            "give me the daily report"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "USER_NAME",
+          "values": [
+            {
+              "name": {
+                "value": "Alex",
+                "synonyms": [
+                  "Sale",
+                  "Salih",
+                  "Salah",
+                  "Alex Example"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "Sam",
+                "synonyms": [
+                  "Tanja",
+                  "Tanya",
+                  "Sam Example"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "Arian",
+                "synonyms": [
+                  "Ariane",
+                  "Aryan"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

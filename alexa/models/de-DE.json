@@ -1,0 +1,117 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "haus trainer",
+      "intents": [
+        {
+          "name": "StatusIntent",
+          "slots": [
+            {
+              "name": "name",
+              "type": "USER_NAME"
+            }
+          ],
+          "samples": [
+            "wie läuft mein training",
+            "wie läuft mein sport",
+            "wie steht es um mein training",
+            "wie ist mein trainingsstand",
+            "wie geht es mit meinem training voran",
+            "wie läuft es mit meinem training",
+            "wie läuft das training von {name}",
+            "wie läuft es bei {name}",
+            "wie steht es um das training von {name}",
+            "wie ist der stand von {name}"
+          ]
+        },
+        {
+          "name": "NameIntent",
+          "slots": [
+            {
+              "name": "name",
+              "type": "USER_NAME"
+            }
+          ],
+          "samples": [
+            "{name}",
+            "ich bin {name}",
+            "hier ist {name}",
+            "hier spricht {name}",
+            "das ist {name}",
+            "ich heiße {name}"
+          ]
+        },
+        {
+          "name": "DailyReportIntent",
+          "slots": [],
+          "samples": [
+            "tagesbericht",
+            "nach dem tagesbericht",
+            "den tagesbericht",
+            "wie war heute",
+            "wie lief es heute",
+            "wie war das training heute",
+            "gib mir den tagesbericht"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "USER_NAME",
+          "values": [
+            {
+              "name": {
+                "value": "Alex",
+                "synonyms": [
+                  "Sale",
+                  "Salih",
+                  "Salah",
+                  "Alex Example"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "Sam",
+                "synonyms": [
+                  "Tanja",
+                  "Tanya",
+                  "Sam Example"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "Arian",
+                "synonyms": [
+                  "Ariane",
+                  "Aryan"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

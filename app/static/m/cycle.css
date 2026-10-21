@@ -1,0 +1,33 @@
+.cycle-card.on { box-shadow: inset 0 0 0 2px color-mix(in srgb, #e57399 70%, transparent); }
+.cycle-card.due { box-shadow: inset 0 0 0 1px color-mix(in srgb, #e57399 45%, transparent); }
+.cycle-pill { font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, #e57399 22%, var(--iron-3)); color: var(--chalk); white-space: nowrap; }
+.cycle-switch { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; cursor: pointer; }
+.cycle-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.cycle-switch i { flex: none; width: 54px; height: 32px; border-radius: 999px; background: var(--iron-3); position: relative; transition: background 0.2s; }
+.cycle-switch i::after { content: ""; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--chalk); transition: transform 0.2s; }
+.cycle-switch input:checked + i { background: #e57399; }
+.cycle-switch input:checked + i::after { transform: translateX(22px); }
+.cycle-switch input:focus-visible + i { outline: 2px solid var(--chalk); outline-offset: 2px; }
+.cycle-scale { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.cycle-scale > span { font-size: 14px; color: var(--chalk-2); font-weight: 600; }
+.cycle-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.cycle-seg button { min-height: 44px; border-radius: 12px; border: var(--line); background: transparent; color: var(--chalk-2); font-weight: 600; font-size: 14px; }
+.cycle-seg button[aria-pressed="true"] { background: #e57399; border-color: #e57399; color: #1b1e22; }
+.cycle-more summary { cursor: pointer; padding: 10px 0; color: var(--chalk-2); font-weight: 600; }
+.cycle-plan .m-list { background: var(--iron-3); }
+.cycle-tag { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--iron-2); color: var(--chalk-2); vertical-align: middle; }
+.cycle-tag.swap { background: color-mix(in srgb, #e57399 25%, var(--iron-2)); color: var(--chalk); }
+.cycle-cue { font-style: italic; }
+.cycle-advice p, .cycle-flags p { margin: 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, #e57399 14%, var(--iron-3)); font-size: 14px; }
+.cycle-flags { gap: 8px; }
+.cycle-chart { height: 180px; position: relative; }
+.cycle-heat { display: grid; grid-template-columns: 64px repeat(var(--days), minmax(10px, 1fr)); gap: 2px; overflow-x: auto; font-size: 11px; }
+.cycle-heat span { color: var(--chalk-3); white-space: nowrap; padding-right: 6px; align-self: center; }
+.cycle-heat em { font-style: normal; color: var(--chalk-3); text-align: center; }
+.cycle-heat i { display: block; min-height: 16px; border-radius: 3px; }
+.cycle-table { display: flex; flex-direction: column; font-size: 14px; }
+.cycle-table > div { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--iron-3); align-items: center; }
+.cycle-table > div:last-child { border-bottom: 0; }
+.cycle-table .head { color: var(--chalk-3); font-size: 12px; font-weight: 700; }
+.cycle-table small { display: block; color: var(--chalk-3); font-size: 12px; }
+.cycle-points { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }

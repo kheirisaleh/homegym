@@ -1,0 +1,20 @@
+name: workout-tracker
+
+services:
+  workout:
+    build: .
+    image: workout-tracker:latest
+    container_name: workout-tracker
+    ports:
+      - "8090:8000"
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Berlin
+      - AUTO_VIDEO=1
+      - AI_PROVIDER=gemini
+      - GEMINI_MODEL=gemini-flash-latest
+    volumes:
+      - ./data:/data
+    mem_limit: 384m
+    restart: unless-stopped

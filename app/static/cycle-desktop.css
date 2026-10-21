@@ -1,0 +1,29 @@
+.cycle-slot { margin-bottom: 24px; max-width: 920px; }
+.health-desktop { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.health-desktop > .m-stat-row, .health-desktop > .cycle-flags { grid-column: 1 / -1; }
+.cycle-desktop .m-card { background: var(--iron-2); border-radius: var(--r-l, 18px); padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+.cycle-desktop .m-card h2 { font-size: 22px; }
+.cycle-desktop .m-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.cycle-desktop .m-card-head a, .cycle-desktop .m-card-head button.link { color: var(--chalk-3); font-size: 14px; background: none; border: 0; padding: 6px 0; cursor: pointer; }
+.cycle-desktop .m-list { display: flex; flex-direction: column; background: var(--iron-3); border-radius: 14px; overflow: hidden; }
+.cycle-desktop .m-item { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--iron-2); background: transparent; text-align: left; color: var(--chalk); text-decoration: none; width: 100%; font: inherit; }
+.cycle-desktop button.m-item { cursor: pointer; }
+.cycle-desktop button.m-item:hover { background: color-mix(in srgb, var(--chalk) 6%, transparent); }
+.cycle-desktop .m-item:last-child { border-bottom: 0; }
+.cycle-desktop .m-item .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cycle-desktop .m-item .grow b { font-weight: 600; }
+.cycle-desktop .m-item .grow span { font-size: 13px; color: var(--chalk-3); }
+.cycle-desktop .m-item .chev { color: var(--chalk-3); font-size: 20px; }
+.cycle-desktop .m-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.cycle-desktop .m-stat { background: var(--iron-2); border-radius: 16px; padding: 16px; }
+.cycle-desktop .m-stat span { font-size: 13px; color: var(--chalk-3); }
+.cycle-desktop .m-stat b { display: block; font-family: var(--display); font-size: 30px; line-height: 1.1; }
+.cycle-desktop .m-stat b small { font-size: 15px; color: var(--chalk-2); margin-left: 4px; }
+.cycle-desktop .m-row-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.cycle-desktop .m-btn-xl { min-height: 52px; font-size: 17px; }
+.cycle-desktop input[type="password"] { max-width: 280px; }
+.cycle-desktop .cycle-switch { max-width: 560px; }
+@media (max-width: 900px) {
+  .health-desktop { grid-template-columns: 1fr; }
+  .cycle-desktop .m-stat-row { grid-template-columns: repeat(2, 1fr); }
+}

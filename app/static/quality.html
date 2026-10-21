@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Program Quality</title>
+<style>
+@font-face { font-family: "Barlow"; font-weight: 400; src: url("/static/fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; src: url("/static/fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("/static/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); }
+:root { --bg: #111214; --panel: #1a1c1f; --line: #2c2f34; --text: #ecebe6; --muted: #9a9a94; --ok: #3fb67a; --warn: #f2c14e; --bad: #e5484d; --accent: #4c86f9; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 "Barlow", system-ui, sans-serif; }
+main { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
+h1, h2 { font-family: "Barlow Condensed", "Barlow", sans-serif; letter-spacing: .02em; margin: 0; }
+h1 { font-size: 34px; }
+h2 { font-size: 24px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.btn { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 12px 18px; font: 600 16px "Barlow", sans-serif; cursor: pointer; min-height: 48px; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); text-decoration: none; display: inline-flex; align-items: center; }
+.btn:disabled { opacity: .5; cursor: default; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0 22px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.tile b { display: block; font: 700 30px "Barlow Condensed", sans-serif; }
+.tile span { color: var(--muted); font-size: 14px; }
+.persona { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.persona summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; list-style: none; }
+.persona summary::-webkit-details-marker { display: none; }
+.meta { color: var(--muted); font-size: 14px; }
+.pill { border-radius: 999px; padding: 2px 10px; font-weight: 600; font-size: 14px; }
+.pill.ok { background: rgba(63,182,122,.15); color: var(--ok); }
+.pill.warn { background: rgba(242,193,78,.15); color: var(--warn); }
+.pill.bad { background: rgba(229,72,77,.15); color: var(--bad); }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+td, th { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+pre { background: #0b0c0d; border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
+ul { margin: 6px 0 10px; padding-left: 20px; }
+.status { color: var(--muted); margin: 6px 0 0; }
+.empty { color: var(--muted); padding: 30px 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Program quality</h1>
+      <p class="status" id="status">Loading</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="run">Run tests</button>
+      <a class="btn ghost" href="/">Back to app</a>
+    </div>
+  </header>
+  <div id="content"></div>
+</main>
+<script>
+const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const statusEl = document.getElementById("status");
+const content = document.getElementById("content");
+const runButton = document.getElementById("run");
+let timer = null;
+
+function scoreClass(score) {
+  if (score === null || score === undefined) return "warn";
+  return score >= 7 ? "ok" : score >= 5 ? "warn" : "bad";
+}
+
+function renderReport(report) {
+  if (!report) {
+    content.innerHTML = '<p class="empty">No test run yet. Press "Run tests". A full run asks the AI to write five programs and review each one, which takes a few minutes.</p>';
+    return;
+  }
+  const s = report.summary;
+  let html = '<div class="tiles">' +
+    '<div class="tile"><b>' + esc(s.average_score ?? "n/a") + '</b><span>average coach score of 10</span></div>' +
+    '<div class="tile"><b>' + esc(s.first_try_valid) + ' / ' + esc(s.personas) + '</b><span>valid on first try</span></div>' +
+    '<div class="tile"><b style="color:' + (s.errors ? "var(--bad)" : "var(--ok)") + '">' + esc(s.errors) + '</b><span>rule errors</span></div>' +
+    '<div class="tile"><b style="color:' + (s.warnings ? "var(--warn)" : "var(--ok)") + '">' + esc(s.warnings) + '</b><span>warnings</span></div>' +
+    '</div><p class="meta">Run at ' + esc(s.time) + ' with ' + esc(s.model) + '</p>';
+  for (const item of report.results) {
+    if (item.crashed) {
+      html += '<section class="persona"><h2>' + esc(item.persona) + '</h2><p class="pill bad">crashed</p><pre>' + esc(item.crashed) + '</pre></section>';
+      continue;
+    }
+    const review = item.review || {};
+    const p = item.profile;
+    html += '<details class="persona"><summary><h2>' + esc(item.persona) + '</h2>' +
+      '<span class="pill ' + scoreClass(review.score) + '">score ' + esc(review.score ?? "n/a") + '</span>' +
+      '<span class="pill ' + (item.errors ? "bad" : "ok") + '">' + esc(item.errors) + ' errors</span>' +
+      '<span class="pill ' + (item.warnings ? "warn" : "ok") + '">' + esc(item.warnings) + ' warnings</span>' +
+      '<span class="meta">' + esc(p.goal) + ', ' + esc(p.days_per_week) + ' days, ' + esc(p.session_minutes) + ' min, ' + esc(item.level) + '</span></summary>';
+    html += '<p class="meta">' + item.attempts.map((a, i) => 'Attempt ' + (i + 1) + ': ' + (a.ok ? "valid" : "invalid") + ' (' + a.seconds + ' s)').join(" | ") +
+      ' | gaps filled by rules: ' + esc(item.gaps_filled) + '</p>';
+    html += '<table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>' + item.checks.map((c) =>
+      '<tr><td>' + esc(c.check) + '</td><td><span class="pill ' + (c.passed ? "ok" : c.level === "error" ? "bad" : "warn") + '">' +
+      (c.passed ? "pass" : c.level === "error" ? "fail" : "warn") + '</span></td><td>' + esc(c.detail) + '</td></tr>').join("") + '</table>';
+    for (const [title, key] of [["Strengths", "strengths"], ["Problems", "problems"], ["Fixes", "fixes"]]) {
+      if (review[key] && review[key].length) html += '<strong>' + title + '</strong><ul>' + review[key].map((t) => '<li>' + esc(t) + '</li>').join("") + '</ul>';
+    }
+    html += '<pre>' + esc(item.program) + '</pre></details>';
+  }
+  content.innerHTML = html;
+}
+
+async function load() {
+  const response = await fetch("/api/quality");
+  const data = await response.json();
+  const state = data.state;
+  runButton.disabled = state.running;
+  if (state.running) {
+    statusEl.textContent = "Running since " + state.started + ", now: " + state.progress;
+    if (!timer) timer = setInterval(load, 5000);
+  } else {
+    statusEl.textContent = state.error ? "Last run failed: " + state.error : "Ready";
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+  renderReport(data.report);
+}
+
+runButton.addEventListener("click", async () => {
+  runButton.disabled = true;
+  const response = await fetch("/api/quality/run", { method: "POST" });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    statusEl.textContent = body.detail || "Could not start the tests";
+    runButton.disabled = false;
+    return;
+  }
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

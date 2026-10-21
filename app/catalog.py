@@ -1,0 +1,252 @@
+MUSCLES = [
+    "chest", "front_delts", "side_delts", "rear_delts", "triceps", "biceps", "forearms",
+    "lats", "upper_back", "lower_back", "abs", "obliques", "quads", "glutes", "hamstrings",
+    "calves", "cardio", "mobility",
+]
+
+NON_HYPERTROPHY_MUSCLES = {"cardio", "mobility"}
+
+PATTERN_FAMILIES = {
+    "push": ["horizontal_push", "incline_push", "vertical_push", "dip", "chest_fly"],
+    "pull": ["vertical_pull", "horizontal_pull", "rear_delt"],
+    "curl": ["elbow_flexion", "elbow_flexion_stretch", "elbow_flexion_neutral"],
+    "extension": ["elbow_extension", "elbow_extension_overhead"],
+    "legs": ["squat", "lunge", "hinge", "knee_flexion", "calf", "hip_abduction"],
+    "core": ["hip_flexion", "core_flexion", "anti_extension", "anti_lateral", "rotation"],
+    "cardio": ["cardio_steady", "cardio_interval"],
+}
+
+
+def pattern_family(pattern):
+    for family, patterns in PATTERN_FAMILIES.items():
+        if pattern in patterns:
+            return family
+    return None
+
+DEFAULT_PRIORITY_MUSCLES = ["biceps", "abs"]
+
+DUMBBELL_WEIGHTS = [round(2.5 * step, 1) for step in range(1, 13)]
+BARBELL_WEIGHTS = [round(10 + 2.5 * step, 1) for step in range(0, 37)]
+MACHINE_WEIGHTS = [5 * step for step in range(1, 41)]
+
+EQUIPMENT = [
+    ("dumbbells", "Dumbbells", "free_weight", True, DUMBBELL_WEIGHTS, "Weight per dumbbell"),
+    ("barbell", "Barbell", "free_weight", True, BARBELL_WEIGHTS, "Total weight including the bar"),
+    ("ez_bar", "EZ bar", "free_weight", False, BARBELL_WEIGHTS, "Total weight including the bar"),
+    ("kettlebell", "Kettlebell", "free_weight", False, [8, 12, 16, 20, 24], ""),
+    ("bench", "Flat bench", "bench", True, None, ""),
+    ("incline_bench", "Adjustable incline bench", "bench", True, None, ""),
+    ("dip_station", "Dip Station", "bodyweight", True, None, ""),
+    ("pullup_bar", "Pull up bar", "bodyweight", True, None, ""),
+    ("captains_chair", "Captain's Chair", "bodyweight", True, None, "Knee raise station"),
+    ("squat_machine", "Squat machine", "machine", True, MACHINE_WEIGHTS, "Added weight"),
+    ("cable", "Cable station", "machine", False, MACHINE_WEIGHTS, ""),
+    ("resistance_band", "Resistance bands", "accessory", False, None, ""),
+    ("exercise_ball", "Exercise ball", "accessory", True, None, ""),
+    ("ab_wheel", "Ab wheel", "accessory", False, None, ""),
+    ("mat", "Mat", "accessory", True, None, ""),
+    ("treadmill", "Treadmill", "cardio", True, None, ""),
+    ("stair_stepper", "Stair stepper", "cardio", True, None, ""),
+    ("bike", "Exercise bike", "cardio", False, None, ""),
+]
+
+E = lambda measure, weight, primary, secondary, pattern, equipment, load, difficulty, cues="": {
+    "measure": measure,
+    "track_weight": weight,
+    "primary": primary,
+    "secondary": secondary,
+    "pattern": pattern,
+    "equipment": equipment,
+    "load": load,
+    "difficulty": difficulty,
+    "cues": cues,
+}
+
+LIBRARY = {
+    "Dumbbell Bench Press": E("reps", True, "chest", ["triceps", "front_delts"], "horizontal_push", ["dumbbells", "bench"], "dumbbells", 2,
+        "Shoulder blades pinched, lower the dumbbells over the chest, elbows at about 45 degrees"),
+    "Dumbbell Incline Bench Press": E("reps", True, "chest", ["front_delts", "triceps"], "incline_push", ["dumbbells", "incline_bench"], "dumbbells", 2,
+        "Bench at 30 degrees, bring the dumbbells to the upper chest"),
+    "Barbell Bench Press": E("reps", True, "chest", ["triceps", "front_delts"], "horizontal_push", ["barbell", "bench"], "barbell", 3,
+        "Feet planted, slight arch, bar to the lower chest"),
+    "Barbell Incline Bench Press": E("reps", True, "chest", ["front_delts", "triceps"], "incline_push", ["barbell", "incline_bench"], "barbell", 3),
+    "Push Up": E("reps", False, "chest", ["triceps", "front_delts"], "horizontal_push", [], None, 1,
+        "Body straight, chest to just above the floor"),
+    "Incline Push Up": E("reps", False, "chest", ["triceps", "front_delts"], "horizontal_push", ["bench"], None, 1),
+    "Decline Push Up": E("reps", False, "chest", ["front_delts", "triceps"], "incline_push", ["bench"], None, 2,
+        "Feet on the bench, targets the upper chest"),
+    "Chest Dip": E("reps", False, "chest", ["triceps", "front_delts"], "dip", ["dip_station"], None, 3,
+        "Lean slightly forward, go down until upper arms are parallel to the floor"),
+    "Dumbbell Fly": E("reps", True, "chest", ["front_delts"], "chest_fly", ["dumbbells", "bench"], "dumbbells", 2,
+        "Ellbogen leicht gebeugt, weite Dehnung unten"),
+    "Dumbbell Incline Fly": E("reps", True, "chest", ["front_delts"], "chest_fly", ["dumbbells", "incline_bench"], "dumbbells", 2),
+    "Dumbbell Pullover": E("reps", True, "chest", ["lats", "triceps"], "chest_fly", ["dumbbells", "bench"], "dumbbells", 2),
+    "Cable Crossover": E("reps", True, "chest", ["front_delts"], "chest_fly", ["cable"], "cable", 2),
+
+    "Dumbbell Seated Shoulder Press": E("reps", True, "front_delts", ["triceps", "side_delts"], "vertical_push", ["dumbbells", "incline_bench"], "dumbbells", 2,
+        "Backrest almost upright, lower the dumbbells to ear height"),
+    "Dumbbell Arnold Press": E("reps", True, "front_delts", ["side_delts", "triceps"], "vertical_push", ["dumbbells", "incline_bench"], "dumbbells", 2),
+    "Barbell Overhead Press": E("reps", True, "front_delts", ["triceps", "side_delts"], "vertical_push", ["barbell"], "barbell", 3),
+    "Pike Push Up": E("reps", False, "front_delts", ["triceps"], "vertical_push", [], None, 2),
+    "Dumbbell Lateral Raise": E("reps", True, "side_delts", [], "lateral_raise", ["dumbbells"], "dumbbells", 1,
+        "Lean slightly forward, lead with the elbows, no swinging"),
+    "Dumbbell Lean Away Lateral Raise": E("reps", True, "side_delts", [], "lateral_raise", ["dumbbells", "dip_station"], "dumbbells", 2),
+    "Dumbbell Incline Y Raise": E("reps", True, "side_delts", ["upper_back"], "lateral_raise", ["dumbbells", "incline_bench"], "dumbbells", 2),
+    "Cable Lateral Raise": E("reps", True, "side_delts", [], "lateral_raise", ["cable"], "cable", 1),
+    "Dumbbell Rear Delt Fly": E("reps", True, "rear_delts", ["upper_back"], "rear_delt", ["dumbbells", "incline_bench"], "dumbbells", 1),
+    "Band Face Pull": E("reps", False, "rear_delts", ["upper_back"], "rear_delt", ["resistance_band"], None, 1),
+
+    "Dumbbell Lying Triceps Extension": E("reps", True, "triceps", [], "elbow_extension", ["dumbbells", "bench"], "dumbbells", 2,
+        "Oberarme still, Hanteln neben den Kopf absenken"),
+    "Dumbbell Overhead Triceps Extension": E("reps", True, "triceps", [], "elbow_extension_overhead", ["dumbbells"], "dumbbells", 2,
+        "Elbows close to the head, deep stretch at the bottom"),
+    "Barbell Lying Triceps Extension": E("reps", True, "triceps", [], "elbow_extension", ["barbell", "bench"], "barbell", 2),
+    "EZ Bar Skull Crusher": E("reps", True, "triceps", [], "elbow_extension", ["ez_bar", "bench"], "ez_bar", 2),
+    "Dumbbell Kickback": E("reps", True, "triceps", [], "elbow_extension", ["dumbbells", "bench"], "dumbbells", 1),
+    "Bench Dip": E("reps", False, "triceps", ["chest", "front_delts"], "dip", ["bench"], None, 1),
+    "Close Grip Push Up": E("reps", False, "triceps", ["chest", "front_delts"], "horizontal_push", [], None, 2),
+    "Triceps Dip": E("reps", False, "triceps", ["chest", "front_delts"], "dip", ["dip_station"], None, 3,
+        "Torso upright, elbows pointing back"),
+    "Barbell Close Grip Bench Press": E("reps", True, "triceps", ["chest", "front_delts"], "horizontal_push", ["barbell", "bench"], "barbell", 3),
+    "Cable Triceps Pushdown": E("reps", True, "triceps", [], "elbow_extension", ["cable"], "cable", 1),
+
+    "Barbell Curl": E("reps", True, "biceps", ["forearms"], "elbow_flexion", ["barbell"], "barbell", 2,
+        "Elbows stay at your sides, no swing from the back"),
+    "EZ Bar Curl": E("reps", True, "biceps", ["forearms"], "elbow_flexion", ["ez_bar"], "ez_bar", 2),
+    "Dumbbell Alternate Bicep Curl": E("reps", True, "biceps", ["forearms"], "elbow_flexion", ["dumbbells"], "dumbbells", 1,
+        "Turn the wrist out at the top, lower slowly"),
+    "Dumbbell Incline Curl": E("reps", True, "biceps", [], "elbow_flexion_stretch", ["dumbbells", "incline_bench"], "dumbbells", 2,
+        "Arms hang behind the body, full stretch at the bottom"),
+    "Dumbbell Concentration Curl": E("reps", True, "biceps", [], "elbow_flexion", ["dumbbells", "bench"], "dumbbells", 1),
+    "Dumbbell Preacher Curl": E("reps", True, "biceps", [], "elbow_flexion", ["dumbbells", "incline_bench"], "dumbbells", 2,
+        "Upper arm on the pad, do not fully lock out at the bottom"),
+    "Dumbbell Spider Curl": E("reps", True, "biceps", [], "elbow_flexion", ["dumbbells", "incline_bench"], "dumbbells", 2),
+    "Dumbbell Hammer Curl": E("reps", True, "biceps", ["forearms"], "elbow_flexion_neutral", ["dumbbells"], "dumbbells", 1,
+        "Neutral grip, hits brachialis and forearm"),
+    "Dumbbell Cross Body Hammer Curl": E("reps", True, "biceps", ["forearms"], "elbow_flexion_neutral", ["dumbbells"], "dumbbells", 1),
+    "Barbell Reverse Curl": E("reps", True, "forearms", ["biceps"], "elbow_flexion_neutral", ["barbell"], "barbell", 2),
+    "Dumbbell Reverse Curl": E("reps", True, "forearms", ["biceps"], "elbow_flexion_neutral", ["dumbbells"], "dumbbells", 1),
+    "Cable Curl": E("reps", True, "biceps", [], "elbow_flexion", ["cable"], "cable", 1),
+    "Band Curl": E("reps", False, "biceps", [], "elbow_flexion", ["resistance_band"], None, 1),
+
+    "Chin Up": E("reps", False, "lats", ["biceps"], "vertical_pull", ["pullup_bar"], None, 3,
+        "Underhand grip, full hang, chest to the bar"),
+    "Pull Up": E("reps", False, "lats", ["biceps", "upper_back"], "vertical_pull", ["pullup_bar"], None, 3),
+    "Negative Chin Up": E("reps", False, "lats", ["biceps"], "vertical_pull", ["pullup_bar"], None, 2,
+        "Start at the top, lower over 4 to 5 seconds"),
+    "Band Assisted Pull Up": E("reps", False, "lats", ["biceps"], "vertical_pull", ["pullup_bar", "resistance_band"], None, 2),
+    "Dumbbell One Arm Row": E("reps", True, "lats", ["upper_back", "biceps"], "horizontal_pull", ["dumbbells", "bench"], "dumbbells", 2,
+        "Hand and knee on the bench, pull the dumbbell to the hip"),
+    "Dumbbell Chest Supported Row": E("reps", True, "upper_back", ["lats", "rear_delts", "biceps"], "horizontal_pull", ["dumbbells", "incline_bench"], "dumbbells", 2),
+    "Barbell Bent Over Row": E("reps", True, "upper_back", ["lats", "biceps", "lower_back"], "horizontal_pull", ["barbell"], "barbell", 3),
+    "Inverted Row": E("reps", False, "upper_back", ["lats", "biceps"], "horizontal_pull", ["barbell"], None, 2),
+
+    "Dumbbell Goblet Squat": E("reps", True, "quads", ["glutes"], "squat", ["dumbbells"], "dumbbells", 1,
+        "Dumbbell at the chest, stay upright, go deep"),
+    "Squat Machine": E("reps", True, "quads", ["glutes"], "squat", ["squat_machine"], "squat_machine", 1),
+    "Barbell Back Squat": E("reps", True, "quads", ["glutes", "lower_back"], "squat", ["barbell"], "barbell", 3),
+    "Dumbbell Bulgarian Split Squat": E("reps", True, "quads", ["glutes"], "lunge", ["dumbbells", "bench"], "dumbbells", 2,
+        "Rear foot on the bench, front knee over the foot"),
+    "Dumbbell Lunge": E("reps", True, "quads", ["glutes"], "lunge", ["dumbbells"], "dumbbells", 1),
+    "Dumbbell Step Up": E("reps", True, "quads", ["glutes"], "lunge", ["dumbbells", "bench"], "dumbbells", 1),
+    "Dumbbell Romanian Deadlift": E("reps", True, "hamstrings", ["glutes", "lower_back"], "hinge", ["dumbbells"], "dumbbells", 2,
+        "Push the hips back, back straight, stretch in the hamstrings"),
+    "Barbell Romanian Deadlift": E("reps", True, "hamstrings", ["glutes", "lower_back"], "hinge", ["barbell"], "barbell", 3),
+    "Dumbbell Hip Thrust": E("reps", True, "glutes", ["hamstrings"], "hinge", ["dumbbells", "bench"], "dumbbells", 1),
+    "Exercise Ball Leg Curl": E("reps", False, "hamstrings", ["glutes"], "knee_flexion", ["exercise_ball"], None, 2),
+    "Glute Bridge": E("reps", False, "glutes", ["hamstrings"], "hinge", ["mat"], None, 1,
+        "Feet close to the hips, push through the heels, squeeze the glutes at the top"),
+    "Dumbbell Single Leg Romanian Deadlift": E("reps", True, "hamstrings", ["glutes"], "hinge", ["dumbbells"], "dumbbells", 2),
+    "Dumbbell Sumo Squat": E("reps", True, "glutes", ["quads"], "squat", ["dumbbells"], "dumbbells", 1,
+        "Wide stance, toes out, knees follow the toes"),
+    "Bodyweight Squat": E("reps", False, "quads", ["glutes"], "squat", [], None, 1),
+    "Band Lateral Walk": E("reps", False, "glutes", [], "hip_abduction", ["resistance_band"], None, 1),
+    "Side Lying Hip Abduction": E("reps", False, "glutes", [], "hip_abduction", ["mat"], None, 1),
+    "Dumbbell Shrug": E("reps", True, "upper_back", [], "shrug", ["dumbbells"], "dumbbells", 1),
+    "Dumbbell Floor Press": E("reps", True, "chest", ["triceps", "front_delts"], "horizontal_push", ["dumbbells", "mat"], "dumbbells", 1),
+    "Dead Bug": E("reps", False, "abs", [], "anti_extension", ["mat"], None, 1,
+        "Lower back stays flat on the floor, move slowly"),
+    "Dumbbell Calf Raise": E("reps", True, "calves", [], "calf", ["dumbbells"], "dumbbells", 1),
+
+    "Captain's Chair Knee Raise": E("reps", False, "abs", ["obliques"], "hip_flexion", ["captains_chair"], None, 1,
+        "Back against the pad, curl the pelvis instead of just lifting the knees"),
+    "Captain's Chair Leg Raise": E("reps", False, "abs", ["obliques"], "hip_flexion", ["captains_chair"], None, 2),
+    "Hanging Knee Raise": E("reps", False, "abs", ["obliques", "forearms"], "hip_flexion", ["pullup_bar"], None, 2),
+    "Hanging Leg Raise": E("reps", False, "abs", ["obliques", "forearms"], "hip_flexion", ["pullup_bar"], None, 3),
+    "Reverse Crunch": E("reps", False, "abs", [], "hip_flexion", ["mat"], None, 1),
+    "Exercise Ball Crunch": E("reps", False, "abs", [], "core_flexion", ["exercise_ball"], None, 1,
+        "Ball under the lower back, full stretch backwards"),
+    "Dumbbell Weighted Crunch": E("reps", True, "abs", [], "core_flexion", ["dumbbells", "mat"], "dumbbells", 2),
+    "Cable Crunch": E("reps", True, "abs", [], "core_flexion", ["cable"], "cable", 2),
+    "Crunch": E("reps", False, "abs", [], "core_flexion", ["mat"], None, 1),
+    "Ab Wheel Rollout": E("reps", False, "abs", ["lats"], "anti_extension", ["ab_wheel"], None, 3),
+    "Plank": E("sec", False, "abs", ["obliques"], "anti_extension", ["mat"], None, 1,
+        "Squeeze the glutes, ribs down, do not sag"),
+    "Exercise Ball Stir The Pot": E("sec", False, "abs", ["obliques"], "anti_extension", ["exercise_ball"], None, 2),
+    "Side Plank": E("sec", False, "obliques", ["abs"], "anti_lateral", ["mat"], None, 1),
+    "Dumbbell Side Bend": E("reps", True, "obliques", [], "anti_lateral", ["dumbbells"], "dumbbells", 1),
+    "Russian Twist": E("reps", False, "obliques", ["abs"], "rotation", ["mat"], None, 1),
+
+    "Treadmill Intervals": E("none", False, "cardio", [], "cardio_interval", ["treadmill"], None, 2),
+    "Treadmill Walking": E("min", False, "cardio", [], "cardio_steady", ["treadmill"], None, 1,
+        "Brisk pace at 5 to 10 percent incline, you can still talk"),
+    "Treadmill Incline Walk": E("min", False, "cardio", ["glutes", "calves"], "cardio_steady", ["treadmill"], None, 1),
+    "Stair Stepper": E("min", False, "cardio", ["glutes", "quads"], "cardio_steady", ["stair_stepper"], None, 2),
+    "Bike Intervals": E("min", False, "cardio", [], "cardio_interval", ["bike"], None, 2),
+    "Walking": E("min", False, "cardio", [], "cardio_steady", [], None, 1),
+    "Stretching": E("min", False, "mobility", [], "mobility", ["mat"], None, 1),
+}
+
+PROGRAMS = [
+    ("Chest & Triceps", 0, [
+        ("Dumbbell Bench Press", 4, "8 to 12", 120),
+        ("Dumbbell Incline Bench Press", 3, "10 to 15", 90),
+        ("Chest Dip", 3, "5 to 8", 120),
+        ("Incline Push Up", 3, "max", 90),
+        ("Dumbbell Lying Triceps Extension", 3, "10 to 15", 75),
+        ("Dumbbell Lateral Raise", 2, "12 to 15", 60),
+    ]),
+    ("Biceps & Back", 1, [
+        ("Barbell Curl", 4, "8 to 12", 90),
+        ("Chin Up", 4, "3 to 5", 120),
+        ("Dumbbell Hammer Curl", 3, "10 to 15", 75),
+        ("Dumbbell Incline Curl", 3, "12 to 15", 75),
+        ("Dumbbell One Arm Row", 3, "10 to 12", 90),
+        ("Captain's Chair Knee Raise", 3, "10 to 15", 60),
+    ]),
+    ("Legs & Treadmill Intervals", 2, [
+        ("Dumbbell Goblet Squat", 3, "12 to 15", 90),
+        ("Dumbbell Lunge", 3, "10 each leg", 90),
+        ("Squat Machine", 2, "15 to 20", 90),
+        ("Treadmill Intervals", 8, "1 round", 0),
+    ]),
+    ("Upper Chest, Shoulders & Triceps", 3, [
+        ("Dumbbell Incline Bench Press", 4, "8 to 12", 120),
+        ("Dumbbell Fly", 3, "12 to 15", 75),
+        ("Dumbbell Seated Shoulder Press", 3, "10 to 12", 90),
+        ("Dumbbell Overhead Triceps Extension", 3, "10 to 15", 75),
+        ("Bench Dip", 3, "12 to 15", 60),
+        ("Dumbbell Lateral Raise", 2, "12 to 15", 60),
+    ]),
+    ("Arms & Abs", 4, [
+        ("Dumbbell Alternate Bicep Curl", 3, "10 to 12", 75),
+        ("Dumbbell Concentration Curl", 3, "10 to 12", 60),
+        ("Barbell Reverse Curl", 3, "10 to 12", 75),
+        ("Close Grip Push Up", 3, "max", 75),
+        ("Exercise Ball Crunch", 3, "15 to 20", 60),
+        ("Plank", 3, "30 to 60 sec", 60),
+    ]),
+    ("Long Walk & Core", 5, [
+        ("Treadmill Walking", 1, "40 min", 60),
+        ("Stair Stepper", 1, "10 min", 60),
+        ("Captain's Chair Knee Raise", 3, "10 to 15", 60),
+        ("Side Plank", 3, "20 to 40 sec", 45),
+    ]),
+    ("Active Recovery", 6, [
+        ("Walking", 1, "30 min", 0),
+        ("Stretching", 1, "10 min", 0),
+    ]),
+]
+
+
+LEGACY_TEXT = {'Kurzhanteln': 'Dumbbells', 'Gewicht pro Hantel': 'Weight per dumbbell', 'Langhantel': 'Barbell', 'Gesamtgewicht inklusive Stange': 'Total weight including the bar', 'SZ Stange': 'EZ bar', 'Flachbank': 'Flat bench', 'Schrägbank verstellbar': 'Adjustable incline bench', 'Klimmzugstange': 'Pull up bar', 'Kniehebe Station': 'Knee raise station', 'Kniebeugen Maschine': 'Squat machine', 'Zusatzgewicht': 'Added weight', 'Kabelzug': 'Cable station', 'Widerstandsbänder': 'Resistance bands', 'Gymnastikball': 'Exercise ball', 'Bauchroller': 'Ab wheel', 'Matte': 'Mat', 'Laufband': 'Treadmill', 'Stepper': 'Stair stepper', 'Ergometer': 'Exercise bike', 'Schulterblätter zusammen, Hanteln über der Brust absenken, Ellbogen etwa 45 Grad': 'Shoulder blades pinched, lower the dumbbells over the chest, elbows at about 45 degrees', 'Bank auf 30 Grad, Hanteln zur oberen Brust führen': 'Bench at 30 degrees, bring the dumbbells to the upper chest', 'Füße fest, leichtes Hohlkreuz, Stange zur unteren Brust': 'Feet planted, slight arch, bar to the lower chest', 'Körper gerade, Brust bis knapp über den Boden': 'Body straight, chest to just above the floor', 'Füße auf der Bank, zielt auf die obere Brust': 'Feet on the bench, targets the upper chest', 'Oberkörper leicht nach vorne, bis Oberarme parallel zum Boden': 'Lean slightly forward, go down until upper arms are parallel to the floor', 'Lehne fast senkrecht, Hanteln bis Ohrhöhe absenken': 'Backrest almost upright, lower the dumbbells to ear height', 'Leicht nach vorne geneigt, Ellbogen führen, nicht schwingen': 'Lean slightly forward, lead with the elbows, no swinging', 'Ellbogen nah am Kopf, tiefe Dehnung unten': 'Elbows close to the head, deep stretch at the bottom', 'Oberkörper aufrecht, Ellbogen nach hinten': 'Torso upright, elbows pointing back', 'Ellbogen bleiben an der Seite, kein Schwung aus dem Rücken': 'Elbows stay at your sides, no swing from the back', 'Handgelenk oben nach außen drehen, langsam absenken': 'Turn the wrist out at the top, lower slowly', 'Arme hängen hinter dem Körper, volle Dehnung unten': 'Arms hang behind the body, full stretch at the bottom', 'Oberarm auf der Lehne, unten nicht ganz ausstrecken lassen': 'Upper arm on the pad, do not fully lock out at the bottom', 'Neutraler Griff, trifft Brachialis und Unterarm': 'Neutral grip, hits brachialis and forearm', 'Untergriff, ganz aushängen, Brust zur Stange': 'Underhand grip, full hang, chest to the bar', 'Oben starten, 4 bis 5 Sekunden absenken': 'Start at the top, lower over 4 to 5 seconds', 'Hand und Knie auf der Bank, Hantel zur Hüfte ziehen': 'Hand and knee on the bench, pull the dumbbell to the hip', 'Hantel vor der Brust, aufrecht, tief runter': 'Dumbbell at the chest, stay upright, go deep', 'Hinterer Fuß auf der Bank, vorderes Knie über dem Fuß': 'Rear foot on the bench, front knee over the foot', 'Hüfte nach hinten schieben, Rücken gerade, Dehnung in den Oberschenkeln': 'Push the hips back, back straight, stretch in the hamstrings', 'Rücken an der Lehne, Becken einrollen statt nur Knie heben': 'Back against the pad, curl the pelvis instead of just lifting the knees', 'Ball unter dem unteren Rücken, volle Dehnung nach hinten': 'Ball under the lower back, full stretch backwards', 'Po anspannen, Rippen runter, nicht durchhängen': 'Squeeze the glutes, ribs down, do not sag', 'Zügig mit Steigung 5 bis 10 Prozent, du kannst noch sprechen': 'Brisk pace at 5 to 10 percent incline, you can still talk', 'Freies Training': 'Free workout'}

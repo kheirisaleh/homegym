@@ -1,0 +1,10 @@
+.env
+data/
+backups/
+backup*/
+*.db
+*.tgz
+__pycache__/
+*.pyc
+docker-compose.override.yml
+.DS_Store
